@@ -10,7 +10,7 @@ git clone https://github.com/danieldupree/pep-talk-generator.git
 cd pep-talk-generator
 
 # Build
-podman built -t pep-talk-generator:100
+podman built -t pep-talk-generator:100 .
 podman run --name pep-talk -p 5000:5000 pep-talk-generator:100
 ```
 
