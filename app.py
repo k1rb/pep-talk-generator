@@ -1,102 +1,64 @@
+from flask import Flask, render_template_string
 import random
+import os
+
+app = Flask(__name__)
+
+def get_hype(filename):
+    """Reads phrases from a file into a list."""
+    if not os.path.exists(filename):
+        raise FileNotFoundError(f"File '{filename}' not found")
+    
+    with open(filename, 'r') as file:
+        phrases = [line.strip() for line in file.readlines()]
+    return phrases
 
 hype = {
-    "col_1": [
-        "Champ,",
-        "Fact:",
-        "Everybody says",
-        "Dang...",
-        "Check it:",
-        "Just Saying...",
-        "Superstar,",
-        "Tiger,",
-        "Self,",
-        "Know this:",
-        "News alert:",
-        "Girl,",
-        "Ace,",
-        "Excuse me but",
-        "Experts agree:",
-        "In my opinion,",
-        "Hear ye, hear ye:",
-        "Okay, listen up:"
-        ],
-    "col_2": [
-        "the mere idea of you",
-        "your soul",
-        "your hair today",
-        "everything you do",
-        "your personal style",
-        "every thought you have",
-        "that sparkle in your eye",
-        "your presence here",
-        "what you got going on",
-        "the essential you",
-        "your life's journey",
-        "that saucy personality",
-        "your DNA",
-        "that brain of yours",
-        "your choice of attire",
-        "the way you roll",
-        "whatever your secret is",
-        "all of y'all"
-    ],
-    "col_3": [
-        "has serious game,",
-        "rains magic,",
-        "deserves the Nobel Prize,",
-        "raises the roof,",
-        "breeds miracles,",
-        "is paying off big time,",
-        "shows mad skills,",
-        "just shimmers,",
-        "is a national treasure,",
-        "gets the party hopping,",
-        "is the next big thing,",
-        "roars like a lion,",
-        "is a rainbow factory,",
-        "is made of diamonds,",
-        "makes birds sing,",
-        "should be taught in school,",
-        "makes my world go 'round,",
-        "is 100% legit,"
-    ],
-    "col_4": [
-        "24/7.",
-        "can I get an amen?",
-        "and thats a fact.",
-        "so treat yourself",
-        "you feel me?",
-        "that's just science.",
-        "would I lie?",
-        "for reals.",
-        "mic drop.",
-        "you hidden gem.",
-        "snuggle bear.",
-        "period.",
-        "can I get an amen?",
-        "now let's dance.",
-        "high five.",
-        "say it again!",
-        "according to CNN.",
-        "so get used to it."
-    ]
+    "greeting": get_hype('hype_greetings.txt'),
+    "subject":  get_hype('hype_subjects.txt'),
+    "action":   get_hype('hype_actions.txt'),
+    "tone":     get_hype('hype_tones.txt')
 }
 
-
-def pick_random_segment(col_name):
-    upper_limit=len(hype[col_name])-1
-    lower_limit=0
-    list_rand=random.randint(lower_limit,upper_limit)
-    segment = hype[col_name][list_rand]
-    return segment
-
 def pep_talk_generator():
-    phrase = ""
-    for col_name in hype.keys():
-        segment = pick_random_segment(col_name)
-        phrase = phrase+" "+segment
-    return phrase
+    items = []
+    for item in hype.keys():
+        items.append(random.choice(hype[item]))
+    return ' '.join(items)
 
-if __name__=='__main__':
-    print(pep_talk_generator())
+@app.route('/')
+def index():
+    text = pep_talk_generator()
+    colors = ["red", "blue", "green", "purple", "orange"]
+    font_sizes = ["14px", "16px", "18px", "20px", "22px"]
+    
+    color = random.choice(colors)
+    font_size = random.choice(font_sizes)
+    
+    html_template = f'''
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Flask App</title>
+        <style>
+            body {{
+                background-color: {color};
+                font-size: {font_size};
+                color: white;
+                text-align: center;
+                padding-top: 50px;
+            }}
+        </style>
+    </head>
+    <body>
+        <h1>{text}</h1>
+    </body>
+    </html>
+    '''
+    
+    return render_template_string(html_template)
+
+if __name__ == '__main__':
+    app.run(debug=True, host='0.0.0.0')
